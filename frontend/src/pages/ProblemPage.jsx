@@ -330,7 +330,6 @@ const ProblemPage = () => {
                       problem={problem} 
                       code={code} 
                       selectedLanguage={langMap[selectedLanguage] || selectedLanguage} 
-                      submitResult={submitResult} 
                     />
                   </div>
                 )}

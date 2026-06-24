@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import axiosClient from "../utils/axiosClient";
 import ReactMarkdown from "react-markdown";
 
-const CodeReview = ({ problem, code, selectedLanguage, submitResult }) => {
+const CodeReview = ({ problem, code, selectedLanguage }) => {
   const [review, setReview] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const isSolved = problem?.isSolved || submitResult?.accepted;
+
 
   const handleReviewCode = async () => {
     setLoading(true);
@@ -34,35 +34,6 @@ const CodeReview = ({ problem, code, selectedLanguage, submitResult }) => {
       setLoading(false);
     }
   };
-
-  if (!isSolved) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-center px-4">
-        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8 text-slate-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-            />
-          </svg>
-        </div>
-        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2">
-          Code Review Locked
-        </h3>
-        <p className="text-slate-500 dark:text-slate-400 max-w-sm">
-          Please submit an accepted solution first to unlock AI Code Review.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col h-full space-y-6">
