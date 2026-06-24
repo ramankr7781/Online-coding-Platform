@@ -8,7 +8,7 @@ const solveDoubt = async(req , res)=>{
        
         const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'];
         let response = null;
-        let lastError = null;
+        let isRateLimitHit = false;
 
         for (const modelName of modelsToTry) {
             try {
@@ -87,17 +87,23 @@ Remember: Your goal is to help users learn and understand DSA concepts through t
                 });
                 break; // If successful, exit loop
             } catch (err) {
-                lastError = err;
-                console.log(`Model ${modelName} failed, trying next...`);
+                console.log(`Model ${modelName} failed:`, err.message);
                 const isRateLimit = err.status === 503 || err.status === 429 || err.message?.includes('503') || err.message?.includes('429');
-                if (!isRateLimit) {
-                    break; // If it's not a rate limit / high traffic error, don't retry
+                if (isRateLimit) {
+                    isRateLimitHit = true;
                 }
             }
         }
 
         if (!response) {
-            throw lastError; // If all failed, throw the last error
+            if (isRateLimitHit) {
+                return res.status(503).json({
+                    message: "All AI models are currently experiencing high demand. Please try again in a few moments."
+                });
+            }
+            return res.status(500).json({
+                message: "Internal server error"
+            });
         }
 
         res.status(201).json({
@@ -108,12 +114,6 @@ Remember: Your goal is to help users learn and understand DSA concepts through t
     }
     catch (err) {
         console.error("AI Error in solveDoubt: ", err);
-        const isRateLimit = err.status === 503 || err.status === 429 || err.message?.includes('503') || err.message?.includes('429');
-        if (isRateLimit) {
-            return res.status(503).json({
-                message: "All AI models are currently experiencing high demand. Please try again in a few moments."
-            });
-        }
         res.status(500).json({
             message: "Internal server error"
         });

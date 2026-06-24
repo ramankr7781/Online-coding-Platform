@@ -33,7 +33,7 @@ Do NOT rewrite their entire code unless absolutely necessary to show a small sni
 
         const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'];
         let response = null;
-        let lastError = null;
+        let isRateLimitHit = false;
 
         for (const modelName of modelsToTry) {
             try {
@@ -43,28 +43,24 @@ Do NOT rewrite their entire code unless absolutely necessary to show a small sni
                 });
                 break; // If successful, exit loop
             } catch (err) {
-                lastError = err;
-                console.log(`Model ${modelName} failed, trying next...`);
+                console.log(`Model ${modelName} failed:`, err.message);
                 const isRateLimit = err.status === 503 || err.status === 429 || err.message?.includes('503') || err.message?.includes('429');
-                if (!isRateLimit) {
-                    break; // If it's not a rate limit / high traffic error, don't retry
+                if (isRateLimit) {
+                    isRateLimitHit = true;
                 }
             }
         }
 
         if (!response) {
-            throw lastError; // If all failed, throw the last error
+            if (isRateLimitHit) {
+                return res.status(503).send("All AI models are currently experiencing high demand. Please try again in a few moments.");
+            }
+            return res.status(500).send("Error generating AI code review. Please try again later.");
         }
 
         res.status(200).send({ review: response.text });
     } catch (err) {
         console.error("Gemini API Error in reviewCode:", err);
-        
-        const isRateLimit = err.status === 503 || err.status === 429 || err.message?.includes('503') || err.message?.includes('429');
-        if (isRateLimit) {
-            return res.status(503).send("All AI models are currently experiencing high demand. Please try again in a few moments.");
-        }
-        
         res.status(500).send("Error generating AI code review. Please try again later.");
     }
 };
