@@ -6,11 +6,17 @@ const solveDoubt = async(req , res)=>{
         const {messages,title,description,testCases,startCode} = req.body;
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
        
-        const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: messages,
-        config: {
-        systemInstruction: `
+        const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'];
+        let response = null;
+        let lastError = null;
+
+        for (const modelName of modelsToTry) {
+            try {
+                response = await ai.models.generateContent({
+                    model: modelName,
+                    contents: messages,
+                    config: {
+                        systemInstruction: `
 You are an expert Data Structures and Algorithms (DSA) tutor specializing in helping users solve coding problems. Your role is strictly limited to DSA-related assistance only.
 
 ## CURRENT PROBLEM CONTEXT:
@@ -78,19 +84,32 @@ You are an expert Data Structures and Algorithms (DSA) tutor specializing in hel
 
 Remember: Your goal is to help users learn and understand DSA concepts through the lens of the current problem, not just to provide quick answers.
 `},
-    });
-     
-    res.status(201).json({
-        message:response.text
-    });
-    console.log(response.text);
-      
+                });
+                break; // If successful, exit loop
+            } catch (err) {
+                lastError = err;
+                console.log(`Model ${modelName} failed, trying next...`);
+                if (err.status !== 503 && !err.message?.includes('503') && err.status !== 429) {
+                    break; // If it's not a rate limit / high traffic error, don't retry
+                }
+            }
+        }
+
+        if (!response) {
+            throw lastError; // If all failed, throw the last error
+        }
+
+        res.status(201).json({
+            message: response.text
+        });
+        console.log(response.text);
+
     }
-    catch(err){
+    catch (err) {
         console.error("AI Error in solveDoubt: ", err);
-        if (err.status === 503 || err.message?.includes('503')) {
+        if (err.status === 503 || err.message?.includes('503') || err.status === 429) {
             return res.status(503).json({
-                message: "The AI model is currently experiencing high demand. Please try again in a few moments."
+                message: "All AI models are currently experiencing high demand. Please try again in a few moments."
             });
         }
         res.status(500).json({

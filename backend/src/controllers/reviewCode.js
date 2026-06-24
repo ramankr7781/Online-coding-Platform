@@ -31,17 +31,36 @@ Suggest a more optimal or cleaner approach if one exists. Keep it concise but ed
 
 Do NOT rewrite their entire code unless absolutely necessary to show a small snippet of optimization. Focus strictly on reviewing.`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: `${systemPrompt}\n\nHere is my code:\n\n\`\`\`${language}\n${code}\n\`\`\``
-        });
+        const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'];
+        let response = null;
+        let lastError = null;
+
+        for (const modelName of modelsToTry) {
+            try {
+                response = await ai.models.generateContent({
+                    model: modelName,
+                    contents: `${systemPrompt}\n\nHere is my code:\n\n\`\`\`${language}\n${code}\n\`\`\``
+                });
+                break; // If successful, exit loop
+            } catch (err) {
+                lastError = err;
+                console.log(`Model ${modelName} failed, trying next...`);
+                if (err.status !== 503 && !err.message?.includes('503') && err.status !== 429) {
+                    break; // If it's not a rate limit / high traffic error, don't retry
+                }
+            }
+        }
+
+        if (!response) {
+            throw lastError; // If all failed, throw the last error
+        }
 
         res.status(200).send({ review: response.text });
     } catch (err) {
         console.error("Gemini API Error in reviewCode:", err);
         
-        if (err.status === 503 || err.message?.includes('503')) {
-            return res.status(503).send("The AI model is currently experiencing high demand. Please try again in a few moments.");
+        if (err.status === 503 || err.message?.includes('503') || err.status === 429) {
+            return res.status(503).send("All AI models are currently experiencing high demand. Please try again in a few moments.");
         }
         
         res.status(500).send("Error generating AI code review. Please try again later.");
