@@ -177,6 +177,8 @@ const getProblemById = async(req,res)=>{
 
    const videos = await SolutionVideo.findOne({problemId:id});
 
+   const isSolved = req.result.problemSolved.includes(id);
+
    if(videos){   
     
    const responseData = {
@@ -184,12 +186,17 @@ const getProblemById = async(req,res)=>{
     secureUrl:videos.secureUrl,
     thumbnailUrl : videos.thumbnailUrl,
     duration : videos.duration,
+    isSolved: isSolved
    } 
   
    return res.status(200).send(responseData);
    }
     
-   res.status(200).send(getProblem);
+   const responseData = {
+    ...getProblem.toObject(),
+    isSolved: isSolved
+   }
+   res.status(200).send(responseData);
 
   }
   catch(err){
@@ -244,7 +251,7 @@ const submittedProblem = async(req,res)=>{
    const ans = await Submission.find({userId,problemId});
   
   if(ans.length==0)
-    res.status(200).send("No Submission is persent");
+    return res.status(200).send([]);
 
   res.status(200).send(ans);
 

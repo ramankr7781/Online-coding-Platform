@@ -34,21 +34,43 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-base-200"> {/* Added bg for contrast */}
-      <div className="card w-96 bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title justify-center text-3xl mb-6">Leetcode</h2> {/* Added mb-6 */}
+    <div className="min-h-screen flex items-center justify-center bg-base-300 relative overflow-hidden">
+      {/* Decorative background blobs */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style={{ animationDelay: '0s' }}></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style={{ animationDelay: '4s' }}></div>
 
-          
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="form-control"> {/* Removed mt-4 from first form-control for tighter spacing to title or global error */}
-              <label className="label"> {/* Removed mb-1, default spacing should be fine */}
-                <span className="label-text">Email</span>
+      <div className="flex w-full max-w-5xl h-[600px] rounded-3xl overflow-hidden shadow-2xl glass-panel z-10 m-4 animate-fade-in-up">
+        {/* Left Side - Hero/Decorative */}
+        <div className="hidden lg:flex flex-col justify-center items-center w-1/2 bg-gradient-to-br from-primary/80 to-secondary/80 p-12 text-primary-content relative">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
+          <div className="z-10 text-center">
+            <h1 className="text-5xl font-extrabold mb-4 tracking-tight drop-shadow-lg">Coding ⭐</h1>
+            <p className="text-lg opacity-90 drop-shadow-md">Master algorithms, crack interviews, and level up your software engineering career.</p>
+          </div>
+        </div>
+
+        {/* Right Side - Form */}
+        <div className="flex flex-col justify-center w-full lg:w-1/2 p-12 bg-base-100/50 backdrop-blur-sm relative">
+          <h2 className="text-3xl font-bold mb-2 text-center">Welcome Back</h2>
+          <p className="text-center text-base-content/60 mb-8">Please enter your details to sign in.</p>
+
+          {error && (
+            <div className="alert alert-error mb-6 shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>{typeof error === 'string' ? error.replace(/Error:\s*/g, '') : "Something went wrong"}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Email</span>
               </label>
               <input
                 type="email"
                 placeholder="john@example.com"
-                className={`input input-bordered w-full ${errors.emailId ? 'input-error' : ''}`} 
+                className={`input input-bordered w-full bg-base-200/50 focus:bg-base-100 transition-colors ${errors.emailId ? 'input-error' : ''}`}
                 {...register('emailId')}
               />
               {errors.emailId && (
@@ -56,20 +78,20 @@ function Login() {
               )}
             </div>
 
-            <div className="form-control mt-4">
+            <div className="form-control">
               <label className="label">
-                <span className="label-text">Password</span>
+                <span className="label-text font-medium">Password</span>
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className={`input input-bordered w-full pr-10 ${errors.password ? 'input-error' : ''}`}
+                  className={`input input-bordered w-full pr-10 bg-base-200/50 focus:bg-base-100 transition-colors ${errors.password ? 'input-error' : ''}`}
                   {...register('password')}
                 />
                 <button
                   type="button"
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-base-content/50 hover:text-primary transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -90,10 +112,10 @@ function Login() {
               )}
             </div>
 
-            <div className="form-control mt-8 flex justify-center">
+            <div className="form-control mt-8 pt-4">
               <button
                 type="submit"
-                className={`btn btn-primary ${loading ? 'loading btn-disabled' : ''}`} // Added btn-disabled for better UX with loading
+                className={`btn btn-primary w-full shadow-lg hover:shadow-primary/30 transition-all ${loading ? 'loading btn-disabled' : ''}`}
                 disabled={loading}
               >
                 {loading ? (
@@ -101,14 +123,15 @@ function Login() {
                     <span className="loading loading-spinner"></span>
                     Logging in...
                   </>
-                ) : 'Login'}
+                ) : 'Sign in'}
               </button>
             </div>
           </form>
-          <div className="text-center mt-6">
-            <span className="text-sm">
-              Don't have an account?{' '} {/* Adjusted text slightly */}
-              <NavLink to="/signup" className="link link-primary">
+
+          <div className="text-center mt-8">
+            <span className="text-sm text-base-content/70">
+              Don't have an account?{' '}
+              <NavLink to="/signup" className="link link-primary font-semibold hover:text-primary-focus">
                 Sign Up
               </NavLink>
             </span>

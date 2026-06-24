@@ -25,16 +25,16 @@ const problemSchema = z.object({
   ).min(1, 'At least one hidden test case required'),
   startCode: z.array(
     z.object({
-      language: z.enum(['C++', 'Java', 'JavaScript']),
+      language: z.enum(['C++', 'Java', 'JavaScript', 'Python']),
       initialCode: z.string().min(1, 'Initial code is required')
     })
-  ).length(3, 'All three languages required'),
+  ).length(4, 'All four languages required'),
   referenceSolution: z.array(
     z.object({
-      language: z.enum(['C++', 'Java', 'JavaScript']),
+      language: z.enum(['C++', 'Java', 'JavaScript', 'Python']),
       completeCode: z.string().min(1, 'Complete code is required')
     })
-  ).length(3, 'All three languages required')
+  ).length(4, 'All four languages required')
 });
 
 function AdminPanel() {
@@ -50,12 +50,14 @@ function AdminPanel() {
       startCode: [
         { language: 'C++', initialCode: '' },
         { language: 'Java', initialCode: '' },
-        { language: 'JavaScript', initialCode: '' }
+        { language: 'JavaScript', initialCode: '' },
+        { language: 'Python', initialCode: '' }
       ],
       referenceSolution: [
         { language: 'C++', completeCode: '' },
         { language: 'Java', completeCode: '' },
-        { language: 'JavaScript', completeCode: '' }
+        { language: 'JavaScript', completeCode: '' },
+        { language: 'Python', completeCode: '' }
       ]
     }
   });
@@ -252,10 +254,10 @@ function AdminPanel() {
           <h2 className="text-xl font-semibold mb-4">Code Templates</h2>
           
           <div className="space-y-6">
-            {[0, 1, 2].map((index) => (
+            {[0, 1, 2, 3].map((index) => (
               <div key={index} className="space-y-2">
                 <h3 className="font-medium">
-                  {index === 0 ? 'C++' : index === 1 ? 'Java' : 'JavaScript'}
+                  {index === 0 ? 'C++' : index === 1 ? 'Java' : index === 2 ? 'JavaScript' : 'Python'}
                 </h3>
                 
                 <div className="form-control">

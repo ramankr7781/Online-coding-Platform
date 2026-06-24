@@ -2,16 +2,12 @@ const { GoogleGenAI } = require("@google/genai");
 
 
 const solveDoubt = async(req , res)=>{
-
-
     try{
-
         const {messages,title,description,testCases,startCode} = req.body;
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
        
-        async function main() {
         const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         contents: messages,
         config: {
         systemInstruction: `
@@ -20,8 +16,8 @@ You are an expert Data Structures and Algorithms (DSA) tutor specializing in hel
 ## CURRENT PROBLEM CONTEXT:
 [PROBLEM_TITLE]: ${title}
 [PROBLEM_DESCRIPTION]: ${description}
-[EXAMPLES]: ${testCases}
-[startCode]: ${startCode}
+[EXAMPLES]: ${JSON.stringify(testCases)}
+[startCode]: ${JSON.stringify(startCode)}
 
 
 ## YOUR CAPABILITIES:
@@ -88,12 +84,15 @@ Remember: Your goal is to help users learn and understand DSA concepts through t
         message:response.text
     });
     console.log(response.text);
-    }
-
-    main();
       
     }
     catch(err){
+        console.error("AI Error in solveDoubt: ", err);
+        if (err.status === 503 || err.message?.includes('503')) {
+            return res.status(503).json({
+                message: "The AI model is currently experiencing high demand. Please try again in a few moments."
+            });
+        }
         res.status(500).json({
             message: "Internal server error"
         });

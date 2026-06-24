@@ -4,10 +4,7 @@ import axiosClient from "../utils/axiosClient";
 import { Send } from 'lucide-react';
 
 function ChatAi({problem}) {
-    const [messages, setMessages] = useState([
-        { role: 'model', parts:[{text: "Hi, How are you"}]},
-        { role: 'user', parts:[{text: "I am Good"}]}
-    ]);
+    const [messages, setMessages] = useState([]);
 
     const { register, handleSubmit, reset,formState: {errors} } = useForm();
     const messagesEndRef = useRef(null);
@@ -18,13 +15,15 @@ function ChatAi({problem}) {
 
     const onSubmit = async (data) => {
         
-        setMessages(prev => [...prev, { role: 'user', parts:[{text: data.message}] }]);
+        const newMessage = { role: 'user', parts:[{text: data.message}] };
+        const updatedMessages = [...messages, newMessage];
+        setMessages(updatedMessages);
         reset();
 
         try {
             
             const response = await axiosClient.post("/ai/chat", {
-                messages:messages,
+                messages: updatedMessages.filter(m => !m.isError),
                 title:problem.title,
                 description:problem.description,
                 testCases: problem.visibleTestCases,
@@ -38,9 +37,11 @@ function ChatAi({problem}) {
             }]);
         } catch (error) {
             console.error("API Error:", error);
+            const errorMessage = error.response?.data?.message || "Error from AI Chatbot. Please wait a moment and try again.";
             setMessages(prev => [...prev, { 
                 role: 'model', 
-                parts:[{text: "Error from AI Chatbot"}]
+                parts:[{text: errorMessage}],
+                isError: true
             }]);
         }
     };
