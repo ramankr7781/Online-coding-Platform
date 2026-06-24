@@ -89,7 +89,8 @@ Remember: Your goal is to help users learn and understand DSA concepts through t
             } catch (err) {
                 lastError = err;
                 console.log(`Model ${modelName} failed, trying next...`);
-                if (err.status !== 503 && !err.message?.includes('503') && err.status !== 429) {
+                const isRateLimit = err.status === 503 || err.status === 429 || err.message?.includes('503') || err.message?.includes('429');
+                if (!isRateLimit) {
                     break; // If it's not a rate limit / high traffic error, don't retry
                 }
             }
@@ -107,7 +108,8 @@ Remember: Your goal is to help users learn and understand DSA concepts through t
     }
     catch (err) {
         console.error("AI Error in solveDoubt: ", err);
-        if (err.status === 503 || err.message?.includes('503') || err.status === 429) {
+        const isRateLimit = err.status === 503 || err.status === 429 || err.message?.includes('503') || err.message?.includes('429');
+        if (isRateLimit) {
             return res.status(503).json({
                 message: "All AI models are currently experiencing high demand. Please try again in a few moments."
             });
