@@ -283,20 +283,23 @@ const ProblemPage = () => {
                   </div>
 
                 {/* Solutions Tab */}
-                <div className={`h-full animate-in fade-in duration-300 ${activeLeftTab === 'solutions' ? 'block' : 'hidden'}`}>
-                  <div className="space-y-4">
-                    {solutions.length > 0 ? (
-                      solutions.map((solution, idx) => (
-                        <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
-                          <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-2">{solution?.title}</h3>
-                          <div className="bg-[#0d1117] rounded-lg p-4">
-                            <pre className="overflow-x-auto text-sm text-slate-300 font-mono">
-                              <code>{solution?.completeCode}</code>
-                            </pre>
-                          </div>
+                <div className={`space-y-6 animate-in fade-in duration-300 ${activeLeftTab === 'solutions' ? 'block' : 'hidden'}`}>
+                  {problem.referenceSolution?.length > 0 ? (
+                    problem.referenceSolution.map((solution, index) => (
+                      <div key={index} className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-4 py-3">
+                          <h3 className="font-bold text-slate-800 dark:text-slate-200">
+                            Official Solution ({solution?.language})
+                          </h3>
                         </div>
-                      ))
-                    ) : (
+                        <div className="bg-[#0d1117] p-4">
+                          <pre className="overflow-x-auto text-sm text-slate-300 font-mono">
+                            <code>{solution?.completeCode}</code>
+                          </pre>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
                       <div className="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center">
                         <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -307,7 +310,6 @@ const ProblemPage = () => {
                       </div>
                     )}
                   </div>
-                </div>
 
                 {/* AI Tab */}
                 <div className={`h-full animate-in fade-in duration-300 flex flex-col ${activeLeftTab === 'ai_help' ? 'block' : 'hidden'}`}>
