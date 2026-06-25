@@ -229,8 +229,8 @@ const ProblemPage = () => {
           <div className="flex-1 overflow-y-auto p-6 bg-white dark:bg-slate-900 custom-scrollbar">
             {problem && (
               <>
-                {activeLeftTab === "statement" && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {/* Problem Statement Tab */}
+                <div className={`space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300 ${activeLeftTab === 'statement' ? 'block' : 'hidden'}`}>
                     
                     {/* Description */}
                     <div className="prose prose-slate dark:prose-invert max-w-none">
@@ -276,27 +276,20 @@ const ProblemPage = () => {
                       </div>
                     </div>
                   </div>
-                )}
 
                 {/* Submissions Tab */}
-                {activeLeftTab === "submissions" && (
-                  <div className="animate-in fade-in duration-300">
+                <div className={`animate-in fade-in duration-300 ${activeLeftTab === 'submissions' ? 'block' : 'hidden'}`}>
                     <SubmissionHistory problemId={problemId} />
                   </div>
-                )}
 
                 {/* Solutions Tab */}
-                {activeLeftTab === "solutions" && (
-                  <div className="space-y-6 animate-in fade-in duration-300">
-                    {problem.referenceSolution?.length > 0 ? (
-                      problem.referenceSolution.map((solution, index) => (
-                        <div key={index} className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
-                          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-4 py-3">
-                            <h3 className="font-bold text-slate-800 dark:text-slate-200">
-                              Official Solution ({solution?.language})
-                            </h3>
-                          </div>
-                          <div className="bg-[#0d1117] p-4">
+                <div className={`h-full animate-in fade-in duration-300 ${activeLeftTab === 'solutions' ? 'block' : 'hidden'}`}>
+                  <div className="space-y-4">
+                    {solutions.length > 0 ? (
+                      solutions.map((solution, idx) => (
+                        <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+                          <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-2">{solution?.title}</h3>
+                          <div className="bg-[#0d1117] rounded-lg p-4">
                             <pre className="overflow-x-auto text-sm text-slate-300 font-mono">
                               <code>{solution?.completeCode}</code>
                             </pre>
@@ -314,25 +307,21 @@ const ProblemPage = () => {
                       </div>
                     )}
                   </div>
-                )}
+                </div>
 
                 {/* AI Tab */}
-                {activeLeftTab === "ai_help" && (
-                  <div className="h-full animate-in fade-in duration-300">
-                    <ChatAi problem={problem} />
-                  </div>
-                )}
+                <div className={`h-full animate-in fade-in duration-300 flex flex-col ${activeLeftTab === 'ai_help' ? 'block' : 'hidden'}`}>
+                  <ChatAi problem={problem} />
+                </div>
 
                 {/* Code Review Tab */}
-                {activeLeftTab === "review" && (
-                  <div className="h-full animate-in fade-in duration-300">
-                    <CodeReview 
-                      problem={problem} 
-                      code={code} 
-                      selectedLanguage={langMap[selectedLanguage] || selectedLanguage} 
-                    />
-                  </div>
-                )}
+                <div className={`h-full animate-in fade-in duration-300 flex flex-col ${activeLeftTab === 'review' ? 'block' : 'hidden'}`}>
+                  <CodeReview 
+                    problem={problem} 
+                    code={code} 
+                    selectedLanguage={langMap[selectedLanguage] || selectedLanguage} 
+                  />
+                </div>
               </>
             )}
           </div>

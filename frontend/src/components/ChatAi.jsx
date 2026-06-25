@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import axiosClient from "../utils/axiosClient";
 import { Send } from 'lucide-react';
+import MarkdownRenderer from "./MarkdownRenderer";
 
 function ChatAi({problem}) {
     const [messages, setMessages] = useState([]);
@@ -52,10 +53,20 @@ function ChatAi({problem}) {
                 {messages.map((msg, index) => (
                     <div 
                         key={index} 
-                        className={`chat ${msg.role === "user" ? "chat-end" : "chat-start"}`}
+                        className={`flex mb-6 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                     >
-                        <div className="chat-bubble bg-base-200 text-base-content">
-                            {msg.parts[0].text}
+                        <div className={`max-w-[85%] rounded-2xl px-5 py-3 ${
+                            msg.role === "user" 
+                                ? "bg-indigo-600 text-white shadow-md rounded-br-none" 
+                                : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm rounded-bl-none"
+                        }`}>
+                            {msg.role === "user" ? (
+                                <p className="whitespace-pre-wrap">{msg.parts[0].text}</p>
+                            ) : (
+                                <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed">
+                                    <MarkdownRenderer content={msg.parts[0].text} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}

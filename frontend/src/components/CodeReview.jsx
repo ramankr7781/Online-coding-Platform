@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axiosClient from "../utils/axiosClient";
-import ReactMarkdown from "react-markdown";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 const CodeReview = ({ problem, code, selectedLanguage }) => {
   const [review, setReview] = useState("");
@@ -78,8 +78,8 @@ const CodeReview = ({ problem, code, selectedLanguage }) => {
       )}
 
       {review && (
-        <div className="prose prose-slate dark:prose-invert max-w-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
-          <ReactMarkdown>{review}</ReactMarkdown>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
+          <MarkdownRenderer content={review} />
         </div>
       )}
 
