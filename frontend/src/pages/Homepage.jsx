@@ -10,6 +10,7 @@ function Homepage() {
 
   const [problems, setProblems] = useState([]);
   const [solvedProblems, setSolvedProblems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     difficulty: "all",
     tag: "all",
@@ -23,6 +24,8 @@ function Homepage() {
         setProblems(data);
       } catch (error) {
         console.error("Error fetching problems:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -177,7 +180,7 @@ function Homepage() {
       {/* Main */}
       <div className="mx-auto max-w-7xl px-4 py-8 relative z-10">
         {/* Hero / Header */}
-        <div className="mb-8 overflow-hidden rounded-3xl glass-card animate-fade-in-up">
+        <div className="mb-8 overflow-hidden rounded-3xl glass-card">
           <div className="flex flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between md:p-8 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 z-0"></div>
             <div className="relative z-10">
@@ -220,7 +223,7 @@ function Homepage() {
         </div>
 
         {/* Filters */}
-        <div className="mb-8 rounded-3xl glass-card p-5 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+        <div className="mb-8 rounded-3xl glass-card p-5">
           <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
             <div>
               <h2 className="text-xl font-bold">Filters</h2>
@@ -313,7 +316,11 @@ function Homepage() {
           </div>
         </div>
 
-        {filteredProblems.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <span className="loading loading-spinner loading-lg text-primary"></span>
+          </div>
+        ) : filteredProblems.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-base-300 bg-base-100 px-6 py-14 text-center shadow-sm">
             <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-base-200">
               <svg
