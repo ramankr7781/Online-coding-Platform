@@ -106,7 +106,6 @@ Remember: Your goal is to help users learn and understand DSA concepts through t
         res.status(201).json({
             message: reply
         });
-        console.log(reply);
 
     }
     catch (err) {

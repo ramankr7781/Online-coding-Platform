@@ -11,7 +11,7 @@ const aiRouter = require("./routes/aiChatting")
 const videoRouter = require("./routes/videoCreator");
 const cors = require('cors')
 
-// console.log("Hello")
+
 
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
