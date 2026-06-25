@@ -42,7 +42,7 @@ Do NOT rewrite their entire code unless absolutely necessary to show a small sni
                     content: `Here is my code:\n\n\`\`\`${language}\n${code}\n\`\`\``
                 }
             ],
-            model: "llama3-70b-8192",
+            model: "llama-3.3-70b-versatile",
         });
 
         res.status(200).send({ review: response.choices[0]?.message?.content || "No review generated." });
