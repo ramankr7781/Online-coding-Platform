@@ -279,7 +279,7 @@ const ProblemPage = () => {
 
                 {/* Submissions Tab */}
                 <div className={`animate-in fade-in duration-300 ${activeLeftTab === 'submissions' ? 'block' : 'hidden'}`}>
-                    <SubmissionHistory problemId={problemId} />
+                    <SubmissionHistory problemId={problemId} submitResult={submitResult} />
                   </div>
 
                 {/* Solutions Tab */}

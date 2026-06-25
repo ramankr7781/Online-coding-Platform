@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axiosClient from '../utils/axiosClient';
 
-const SubmissionHistory = ({ problemId }) => {
+const SubmissionHistory = ({ problemId, submitResult }) => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,7 +23,7 @@ const SubmissionHistory = ({ problemId }) => {
     };
 
     fetchSubmissions();
-  }, [problemId]);
+  }, [problemId, submitResult]);
 
   const getStatusColor = (status) => {
     switch (status) {
