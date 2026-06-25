@@ -1,4 +1,4 @@
-const { GoogleGenAI } = require('@google/genai');
+const Groq = require('groq-sdk');
 
 const reviewCode = async (req, res) => {
     try {
@@ -8,7 +8,7 @@ const reviewCode = async (req, res) => {
             return res.status(400).send("No code provided for review.");
         }
 
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
         const systemPrompt = `You are an expert technical interviewer and AI code reviewer.
 Analyze the user's provided code for the following problem:
@@ -31,36 +31,23 @@ Suggest a more optimal or cleaner approach if one exists. Keep it concise but ed
 
 Do NOT rewrite their entire code unless absolutely necessary to show a small snippet of optimization. Focus strictly on reviewing.`;
 
-        const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'];
-        let response = null;
-        let isRateLimitHit = false;
-
-        for (const modelName of modelsToTry) {
-            try {
-                response = await ai.models.generateContent({
-                    model: modelName,
-                    contents: `${systemPrompt}\n\nHere is my code:\n\n\`\`\`${language}\n${code}\n\`\`\``
-                });
-                break; // If successful, exit loop
-            } catch (err) {
-                console.log(`Model ${modelName} failed:`, err.message);
-                const isRateLimit = err.status === 503 || err.status === 429 || err.message?.includes('503') || err.message?.includes('429');
-                if (isRateLimit) {
-                    isRateLimitHit = true;
+        const response = await groq.chat.completions.create({
+            messages: [
+                {
+                    role: "system",
+                    content: systemPrompt
+                },
+                {
+                    role: "user",
+                    content: `Here is my code:\n\n\`\`\`${language}\n${code}\n\`\`\``
                 }
-            }
-        }
+            ],
+            model: "llama3-70b-8192",
+        });
 
-        if (!response) {
-            if (isRateLimitHit) {
-                return res.status(503).send("All AI models are currently experiencing high demand. Please try again in a few moments.");
-            }
-            return res.status(500).send("Error generating AI code review. Please try again later.");
-        }
-
-        res.status(200).send({ review: response.text });
+        res.status(200).send({ review: response.choices[0]?.message?.content || "No review generated." });
     } catch (err) {
-        console.error("Gemini API Error in reviewCode:", err);
+        console.error("Groq API Error in reviewCode:", err);
         res.status(500).send("Error generating AI code review. Please try again later.");
     }
 };

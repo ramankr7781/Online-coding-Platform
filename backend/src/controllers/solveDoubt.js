@@ -1,22 +1,11 @@
-const { GoogleGenAI } = require("@google/genai");
+const Groq = require('groq-sdk');
 
-
-const solveDoubt = async(req , res)=>{
-    try{
-        const {messages,title,description,testCases,startCode} = req.body;
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
-       
-        const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'];
-        let response = null;
-        let isRateLimitHit = false;
-
-        for (const modelName of modelsToTry) {
-            try {
-                response = await ai.models.generateContent({
-                    model: modelName,
-                    contents: messages,
-                    config: {
-                        systemInstruction: `
+const solveDoubt = async (req, res) => {
+    try {
+        const { messages, title, description, testCases, startCode } = req.body;
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+        
+        const systemInstruction = `
 You are an expert Data Structures and Algorithms (DSA) tutor specializing in helping users solve coding problems. Your role is strictly limited to DSA-related assistance only.
 
 ## CURRENT PROBLEM CONTEXT:
@@ -83,41 +72,49 @@ You are an expert Data Structures and Algorithms (DSA) tutor specializing in hel
 - Promote best coding practices
 
 Remember: Your goal is to help users learn and understand DSA concepts through the lens of the current problem, not just to provide quick answers.
-`},
-                });
-                break; // If successful, exit loop
-            } catch (err) {
-                console.log(`Model ${modelName} failed:`, err.message);
-                const isRateLimit = err.status === 503 || err.status === 429 || err.message?.includes('503') || err.message?.includes('429');
-                if (isRateLimit) {
-                    isRateLimitHit = true;
+`;
+        
+        let chatMessages = [{ role: "system", content: systemInstruction }];
+        
+        if (typeof messages === 'string') {
+            chatMessages.push({ role: "user", content: messages });
+        } else if (Array.isArray(messages)) {
+            messages.forEach(msg => {
+                if (typeof msg === 'string') {
+                    chatMessages.push({ role: "user", content: msg });
+                } else if (msg.role && msg.parts) {
+                    chatMessages.push({ 
+                        role: msg.role === 'model' ? 'assistant' : 'user', 
+                        content: msg.parts[0]?.text || ''
+                    });
+                } else if (msg.role && msg.content) {
+                    chatMessages.push({
+                        role: msg.role === 'model' ? 'assistant' : msg.role,
+                        content: msg.content
+                    });
                 }
-            }
-        }
-
-        if (!response) {
-            if (isRateLimitHit) {
-                return res.status(503).json({
-                    message: "All AI models are currently experiencing high demand. Please try again in a few moments."
-                });
-            }
-            return res.status(500).json({
-                message: "Internal server error"
             });
         }
 
-        res.status(201).json({
-            message: response.text
+        const response = await groq.chat.completions.create({
+            messages: chatMessages,
+            model: "llama3-70b-8192",
         });
-        console.log(response.text);
+
+        const reply = response.choices[0]?.message?.content || "I couldn't generate a response.";
+        
+        res.status(201).json({
+            message: reply
+        });
+        console.log(reply);
 
     }
     catch (err) {
-        console.error("AI Error in solveDoubt: ", err);
+        console.error("Groq API Error in solveDoubt: ", err);
         res.status(500).json({
             message: "Internal server error"
         });
     }
-}
+};
 
 module.exports = solveDoubt;
