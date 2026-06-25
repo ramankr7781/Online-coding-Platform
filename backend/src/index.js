@@ -13,6 +13,8 @@ const aiRouter = require("./routes/aiChatting");
 const videoRouter = require("./routes/videoCreator");
 const redisClient = require("./config/redis");
 
+app.set("trust proxy", 1);
+
 // Allowed frontend origins
 const allowedOrigins = [
   "http://localhost:5173",
