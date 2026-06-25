@@ -35,6 +35,7 @@ const register = async (req,res)=>{
      });
      res.status(201).json({
         user:reply,
+        token: token,
         message:"Loggin Successfully"
     })
     }
@@ -80,6 +81,7 @@ const login = async (req,res)=>{
         });
         res.status(201).json({
             user:reply,
+            token: token,
             message:"Loggin Successfully"
         })
     }
@@ -138,7 +140,7 @@ const adminRegister = async(req,res)=>{
         secure: true,
         sameSite: 'none'
      });
-     res.status(201).send("User Registered Successfully");
+     res.status(201).json({ message: "User Registered Successfully", token: token });
     }
     catch(err){
         res.status(400).send("Error: "+err);
