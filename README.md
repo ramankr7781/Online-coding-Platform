@@ -174,5 +174,3 @@ Start the frontend development server:
 npm run dev
 ```
 
-## 🔐 Security Note
-This repository does not contain any secret API keys or database credentials. Always ensure your `.env` files are included in your `.gitignore` to prevent leaking sensitive information.
