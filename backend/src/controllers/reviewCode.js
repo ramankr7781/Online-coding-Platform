@@ -1,4 +1,4 @@
-const Groq = require('groq-sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const reviewCode = async (req, res) => {
     try {
@@ -8,7 +8,7 @@ const reviewCode = async (req, res) => {
             return res.status(400).send("No code provided for review.");
         }
 
-        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
         const systemPrompt = `You are an expert technical interviewer and AI code reviewer.
 Analyze the user's provided code for the following problem:
@@ -31,23 +31,16 @@ Suggest a more optimal or cleaner approach if one exists. Keep it concise but ed
 
 Do NOT rewrite their entire code unless absolutely necessary to show a small snippet of optimization. Focus strictly on reviewing.`;
 
-        const response = await groq.chat.completions.create({
-            messages: [
-                {
-                    role: "system",
-                    content: systemPrompt
-                },
-                {
-                    role: "user",
-                    content: `Here is my code:\n\n\`\`\`${language}\n${code}\n\`\`\``
-                }
-            ],
-            model: "llama-3.3-70b-versatile",
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            systemInstruction: systemPrompt 
         });
 
-        res.status(200).send({ review: response.choices[0]?.message?.content || "No review generated." });
+        const result = await model.generateContent(`Here is my code:\n\n\`\`\`${language}\n${code}\n\`\`\``);
+
+        res.status(200).send({ review: result.response.text() || "No review generated." });
     } catch (err) {
-        console.error("Groq API Error in reviewCode:", err);
+        console.error("Gemini API Error in reviewCode:", err);
         res.status(500).send("Error generating AI code review. Please try again later.");
     }
 };

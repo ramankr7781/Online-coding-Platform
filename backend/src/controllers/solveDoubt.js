@@ -1,9 +1,9 @@
-const Groq = require('groq-sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const solveDoubt = async (req, res) => {
     try {
         const { messages, title, description, testCases, startCode } = req.body;
-        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         
         const systemInstruction = `
 You are an expert Data Structures and Algorithms (DSA) tutor specializing in helping users solve coding problems. Your role is strictly limited to DSA-related assistance only.
@@ -74,34 +74,43 @@ You are an expert Data Structures and Algorithms (DSA) tutor specializing in hel
 Remember: Your goal is to help users learn and understand DSA concepts through the lens of the current problem, not just to provide quick answers.
 `;
         
-        let chatMessages = [{ role: "system", content: systemInstruction }];
+        const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            systemInstruction: systemInstruction
+        });
+        
+        let chatContents = [];
         
         if (typeof messages === 'string') {
-            chatMessages.push({ role: "user", content: messages });
+            chatContents.push({ role: "user", parts: [{ text: messages }] });
         } else if (Array.isArray(messages)) {
             messages.forEach(msg => {
+                let role = "user";
+                let text = "";
                 if (typeof msg === 'string') {
-                    chatMessages.push({ role: "user", content: msg });
+                    text = msg;
                 } else if (msg.role && msg.parts) {
-                    chatMessages.push({ 
-                        role: msg.role === 'model' ? 'assistant' : 'user', 
-                        content: msg.parts[0]?.text || ''
-                    });
+                    role = (msg.role === 'model' || msg.role === 'assistant') ? 'model' : 'user';
+                    text = msg.parts[0]?.text || '';
                 } else if (msg.role && msg.content) {
-                    chatMessages.push({
-                        role: msg.role === 'model' ? 'assistant' : msg.role,
-                        content: msg.content
+                    role = (msg.role === 'model' || msg.role === 'assistant') ? 'model' : 'user';
+                    text = msg.content;
+                }
+                
+                if (text) {
+                    chatContents.push({
+                        role: role,
+                        parts: [{ text: text }]
                     });
                 }
             });
         }
 
-        const response = await groq.chat.completions.create({
-            messages: chatMessages,
-            model: "llama-3.3-70b-versatile",
-        });
-
-        const reply = response.choices[0]?.message?.content || "I couldn't generate a response.";
+        let reply = "I couldn't generate a response.";
+        if (chatContents.length > 0) {
+            const response = await model.generateContent({ contents: chatContents });
+            reply = response.response.text();
+        }
         
         res.status(201).json({
             message: reply
@@ -109,7 +118,7 @@ Remember: Your goal is to help users learn and understand DSA concepts through t
 
     }
     catch (err) {
-        console.error("Groq API Error in solveDoubt: ", err);
+        console.error("Gemini API Error in solveDoubt: ", err);
         res.status(500).json({
             message: "Internal server error"
         });
