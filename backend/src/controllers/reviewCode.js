@@ -32,7 +32,7 @@ Suggest a more optimal or cleaner approach if one exists. Keep it concise but ed
 Do NOT rewrite their entire code unless absolutely necessary to show a small snippet of optimization. Focus strictly on reviewing.`;
 
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             systemInstruction: systemPrompt 
         });
 
